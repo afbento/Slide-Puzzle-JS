@@ -17,9 +17,9 @@
     <body>
 
 <canvas id="puzzle" width="640" height="640"></canvas>
-<p id="texto"></p>
+<p id="texto" style="font-size:50px;"></p>
 <form>
-  <input type="hidden" id="again" value="Jogar de novo?">
+  <input type="hidden" id="again" style="font-size:50px;" value="Jogar de novo?">
 </form>
 
 <script >
@@ -38,7 +38,7 @@ canvas.style.left=0;
 canvas.style.top=(window.innerHeight/2)-(canvas.height/2)+"px";
 canvas.style.position="absolute";
 
-document.getElementById("texto").innerHTML=canvas.width;
+//document.getElementById("texto").innerHTML=canvas.width;
 
 var img=new Image();
 img.src='teste.png';
