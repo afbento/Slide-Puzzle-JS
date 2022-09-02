@@ -2,45 +2,34 @@
 <html>
     <head>
 		<meta name="apple-mobile-web-app-capable"content="yes">
+	<!--	<meta http-equiv=”Content-Type” content=”text/html; charset=iso-8859-1″> -->
 		
         <title>Puzzle Game</title>
 		<style type="text/css">
 
-			@property --a {
-				syntax: '<color>'; inherits: false; initial-value: #FF9861; }	
-			@property --b {
-				syntax: '<color>'; inherits: false; initial-value: #FFFB89; }
-			@property --c {
-				syntax: '<color>'; inherits: false; initial-value: #74BDCB; }
-			@property --d {
-				syntax: '<color>'; inherits: false; initial-value: #0E42C4; }
-
-			.wrapper {
-				width:100%;
+			
+			body {
+				width: 100%;
 				height: 100%;
-				background: radial-gradient(circle , var(--a), var(--b), var(--c), var(--d)); 
-				background-size: 100% 100%;
-				animation: gradient 12s linear infinite;
-				}
+				background: linear-gradient(45deg ,#FF9861,#FFFB89,#74BDCB,#0E42C4);
+				background-size: 400% 100%;
+				animation: gradient 15s ease infinite alternate;
+				} 
 			@keyframes gradient {
-				25% {--a:#0E42C4;--b:#FF9861;--c:#FFFB89;--d:#74BDCB;}
-				50% {--a:#74BDCB;--b:#0E42C4;--c:#FF9861;--d:#FFFB89;}
-				75% {--a:#FFFB89;--b:#74BDCB;--c:#0E42C4;--d:#FF9861;}
-				100% {--a:#FF9861;--b:#FFFB89;--c:#74BDCB;--d:#0E42C4;}
+				0% { background-position: 0% 0%; }
+				100% { background-position: 100% 0%; }
+				
 				}
-				
-				
+			
 		
 			html,body { -webkit-user-select:none; -webkit-touch-callout:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
-						height: 100%; overflow: hidden; margin: auto; display: block; outline:none; touch-action: pan-x pan-y; touch-action: none;}
+						width: 100%; height: 100%; z-index: 0; overflow: hidden; margin: auto; display: block; outline:none; touch-action: pan-x pan-y; touch-action: none;}
 
 		</style>
 
     </head>
     <body>
-<div class="wrapper"></div>	
-		
-		
+
 
 <canvas id="puzzle" width="640" height="640"></canvas>
 <p id="texto" style="font-size:30px;"></p>
@@ -57,18 +46,15 @@ var context=canvas.getContext('2d');
 
 
 if(window.innerWidth>window.innerHeight) {
-	canvas.width=window.innerHeight;
-	canvas.height=window.innerHeight;
-	canvas.style.left=(window.innerWidth/2)-(canvas.width/2)+"px";;
-	canvas.style.top=0;
-	canvas.style.position="absolute";
+	canvas.width=window.innerHeight*0.95;
+	canvas.height=window.innerHeight*0.95;
 	} else {
-	canvas.width=window.innerWidth;
-	canvas.height=window.innerWidth;
-	canvas.style.left=0;
+	canvas.width=window.innerWidth*0.95;
+	canvas.height=window.innerWidth*0.95; }
+	canvas.style.left=(window.innerWidth/2)-(canvas.width/2)+"px";
 	canvas.style.top=(window.innerHeight/2)-(canvas.height/2)+"px";
 	canvas.style.position="absolute";
-	}
+	
 
 //document.getElementById("texto").innerHTML=canvas.width;
 
@@ -125,7 +111,7 @@ function mouseDown(e) {
 
 function mouseMove(e) {
 	if(dragging&&!solved) {
-		context.clearRect(drg.x,drg.y,tS,tS);
+		context.clearRect(drg.x-space,drg.y-space,tS+space,tS+space);
 		drg.x=e.clientX-canvas.offsetLeft-tS/2;
 		drg.y=e.clientY-canvas.offsetTop-tS/2;
 		if(dx==0) {
@@ -192,7 +178,7 @@ function movePiece() {
     drawTiles();
   }
   if (solved) {
-    document.getElementById("texto").innerHTML="PARABÉNS !!!!";
+    document.getElementById("texto").innerHTML="PARAB&EacuteNS !!!!";
 	document.getElementById("again").type="button";
   }
 }
@@ -284,7 +270,7 @@ function checkSolved() {
 
 </script>
 
-<p> (c)2022 - Fabio de Araujo Bento</p>
+<p> (c)2022 - Fabio A. Bento</p>
 
     </body>
 </html>
