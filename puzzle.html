@@ -1,0 +1,236 @@
+<html>
+    <head>
+		<meta name="apple-mobile-web-app-capable"content="yes">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>Puzzle Game</title>
+		<style type="text/css">
+		html {
+			background: radial-gradient(circle closest-corner, #FF8961, #FFFB89, #74BDCB, #0E42C4) fixed;
+		}
+		html,body { -webkit-user-select:none; -webkit-touch-callout:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
+						height: 100%; overflow: hidden; margin: auto; display: block; outline:none; touch-action: pan-x pan-y; touch-action: none;} 
+		</style>
+			
+    </head>
+
+
+    <body>
+
+<div id="slider"><form><input type="hidden" id="scale" value="3"></form></div>
+<canvas id="puzzle" width="640" height="640"></canvas>
+<p id="texto"></p>
+<form>
+  <input type="hidden" id="again" value="Jogar de novo?">
+</form>
+
+<script >
+
+var canvas = document.getElementById("puzzle");
+var cw=window.innerWidth;
+if(cw>512) cw=512;
+canvas.width=cw;
+
+
+
+var context = canvas.getContext('2d');
+
+var img = new Image();
+img.src = 'teste.png';
+//img.src = 'data:image/png;base64,
+img.addEventListener('load', drawTiles, false);
+
+var boardSize = canvas.width;
+var tileCount = document.getElementById('scale').value;
+
+var tileSize = boardSize / tileCount;
+
+var clickLoc = new Object;
+clickLoc.x = 0;
+clickLoc.y = 0;
+
+var emptyLoc = new Object;
+emptyLoc.x = 0;
+emptyLoc.y = 0;
+
+var space=2;
+
+var solved = false;
+
+var dragging=false;
+var dx,dy;
+var drgx,drgy;
+var clix,cliy;
+var empx,empy;
+
+var boardParts;
+setBoard();
+
+document.getElementById('scale').onchange = function() {
+  tileCount = this.value;
+  tileSize = boardSize / tileCount;
+  setBoard();
+  drawTiles();
+};
+
+var mouseDown = function(e) {
+  clickLoc.x = Math.floor((e.pageX - this.offsetLeft) / tileSize);
+  clickLoc.y = Math.floor((e.pageY - this.offsetTop) / tileSize);
+  e.preventDefault();
+  if (distance(clickLoc.x, clickLoc.y, emptyLoc.x, emptyLoc.y) == 1) {
+  dragging=true;
+  drgx=clickLoc.x*tileSize;
+  drgy=clickLoc.y*tileSize;
+  clix=drgx;
+  cliy=drgy;
+  empx=emptyLoc.x*tileSize;
+  empy=emptyLoc.y*tileSize;
+  dx=(clickLoc.x - emptyLoc.x);
+  dy=(clickLoc.y - emptyLoc.y);
+  }
+}
+
+var mouseMove = function(e) {
+	if(dragging) {
+		context.clearRect ( drgx , drgy , tileSize , tileSize );
+		drgx=e.pageX - this.offsetLeft-tileSize/2;
+		drgy=e.pageY - this.offsetTop-tileSize/2;
+		e.preventDefault();
+		if(dx==0) {
+			drgx=clix;
+			if(dy>0) {
+				if(drgy>cliy) drgy=cliy;
+				if(drgy<empy) drgy=empy;
+				}
+			if(dy<0) {
+				if(drgy<cliy) drgy=cliy;
+				if(drgy>empy) drgy=empy;
+				}
+			}
+		if(dy==0) {
+			drgy=cliy;
+			if(dx>0) {
+				if(drgx>clix) drgx=clix;
+				if(drgx<empx) drgx=empx;
+				}
+			if(dx<0) {
+				if(drgx<clix) drgx=clix;
+				if(drgx>empx) drgx=empx;
+				}
+			}
+		var x = boardParts[clickLoc.x][clickLoc.y].x;
+        var y = boardParts[clickLoc.x][clickLoc.y].y;
+		context.drawImage(img, x * tileSize, y * tileSize, tileSize, tileSize,drgx, drgy, tileSize-space, tileSize-space);
+	}
+}
+
+var mouseUp = function(e){
+	if(dragging) {
+		if(dx==0) {
+			var d1=Math.abs(drgy-cliy);
+			var d2=Math.abs(drgy-empy);
+			}
+		if(dy==0) {
+			var d1=Math.abs(drgx-clix);
+			var d2=Math.abs(drgx-empx);
+			}
+			if(d1>d2) movePiece(); else {
+				var x = boardParts[clickLoc.x][clickLoc.y].x;
+				var y = boardParts[clickLoc.x][clickLoc.y].y;
+				context.clearRect ( empx , empy , tileSize , tileSize );
+				context.drawImage(img, x * tileSize, y * tileSize, tileSize, tileSize,clix, cliy, tileSize-space, tileSize-space);
+				}
+		dragging=false;
+	}
+	
+}
+
+canvas.addEventListener("touchstart", mouseDown, false);
+canvas.addEventListener("touchend", mouseUp, false);
+canvas.addEventListener("mouseout", mouseUp, false);
+canvas.addEventListener("touchmove", mouseMove, false);
+		 
+canvas.addEventListener("mousedown", mouseDown, false);
+canvas.addEventListener("mouseup", mouseUp, false);
+canvas.addEventListener("mouseout", mouseUp, false);
+canvas.addEventListener("mousemove", mouseMove, false);
+
+function movePiece() {
+  if (distance(clickLoc.x, clickLoc.y, emptyLoc.x, emptyLoc.y) == 1) {
+    slideTile(emptyLoc, clickLoc);
+    drawTiles();
+  }
+  if (solved) {
+    document.getElementById("texto").innerHTML = "PARABÉNS !!!!";
+	document.getElementById("again").type="button";
+  }
+}
+
+document.getElementById('again').onclick = function(e) {
+	document.getElementById("texto").innerHTML = "";
+	space=2;
+	setBoard(); 
+	drawTiles();
+	document.getElementById("again").type="hidden";
+	}
+
+
+function setBoard() {
+  boardParts = new Array(tileCount);
+  for (var i = 0; i < tileCount; ++i) {
+    boardParts[i] = new Array(tileCount);
+    for (var j = 0; j < tileCount; ++j) {
+      boardParts[i][j] = new Object;
+      boardParts[i][j].x = (tileCount - 1) - i;
+      boardParts[i][j].y = (tileCount - 1) - j;
+    }
+  }
+  emptyLoc.x = boardParts[tileCount - 1][tileCount - 1].x;
+  emptyLoc.y = boardParts[tileCount - 1][tileCount - 1].y;
+  solved = false;
+}
+
+function drawTiles() {
+  context.clearRect ( 0 , 0 , boardSize , boardSize );
+  for (var i = 0; i < tileCount; ++i) {
+    for (var j = 0; j < tileCount; ++j) {
+      var x = boardParts[i][j].x;
+      var y = boardParts[i][j].y;
+	  if(solved == true) space=0;
+      if(i != emptyLoc.x || j != emptyLoc.y || solved == true) {
+        context.drawImage(img, x * tileSize, y * tileSize, tileSize, tileSize,            i * tileSize, j * tileSize, tileSize-space, tileSize-space);
+      }
+    }
+  }
+}
+
+function distance(x1, y1, x2, y2) {
+  return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+}
+
+function slideTile(toLoc, fromLoc) {
+  if (!solved) {
+    boardParts[toLoc.x][toLoc.y].x = boardParts[fromLoc.x][fromLoc.y].x;
+    boardParts[toLoc.x][toLoc.y].y = boardParts[fromLoc.x][fromLoc.y].y;
+    boardParts[fromLoc.x][fromLoc.y].x = tileCount - 1;
+    boardParts[fromLoc.x][fromLoc.y].y = tileCount - 1;
+    toLoc.x = fromLoc.x;
+    toLoc.y = fromLoc.y;
+    checkSolved();
+  }
+}
+
+function checkSolved() {
+  var flag = true;
+  for (var i = 0; i < tileCount; ++i) {
+    for (var j = 0; j < tileCount; ++j) {
+      if (boardParts[i][j].x != i || boardParts[i][j].y != j) {
+        flag = false;
+      }
+    }
+  }
+  solved = flag;
+}
+
+</script>
+    </body>
+</html>
