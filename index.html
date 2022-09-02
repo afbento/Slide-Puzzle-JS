@@ -5,16 +5,42 @@
 		
         <title>Puzzle Game</title>
 		<style type="text/css">
-		html {
-			background: radial-gradient(circle closest-corner, #FF8961, #FFFB89, #74BDCB, #0E42C4) fixed;
-						
-		}
-		html,body { -webkit-user-select:none; -webkit-touch-callout:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
-		  		    height: 100%; overflow: hidden; margin: auto; display: block; outline:none; touch-action: pan-x pan-y; touch-action: none;}
+
+			@property --a {
+				syntax: '<color>'; inherits: false; initial-value: #FF9861; }	
+			@property --b {
+				syntax: '<color>'; inherits: false; initial-value: #FFFB89; }
+			@property --c {
+				syntax: '<color>'; inherits: false; initial-value: #74BDCB; }
+			@property --d {
+				syntax: '<color>'; inherits: false; initial-value: #0E42C4; }
+
+			.wrapper {
+				width:100%;
+				height: 100%;
+				background: radial-gradient(circle , var(--a), var(--b), var(--c), var(--d)); 
+				background-size: 100% 100%;
+				animation: gradient 12s linear infinite;
+				}
+			@keyframes gradient {
+				25% {--a:#0E42C4;--b:#FF9861;--c:#FFFB89;--d:#74BDCB;}
+				50% {--a:#74BDCB;--b:#0E42C4;--c:#FF9861;--d:#FFFB89;}
+				75% {--a:#FFFB89;--b:#74BDCB;--c:#0E42C4;--d:#FF9861;}
+				100% {--a:#FF9861;--b:#FFFB89;--c:#74BDCB;--d:#0E42C4;}
+				}
+				
+				
+		
+			html,body { -webkit-user-select:none; -webkit-touch-callout:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
+						height: 100%; overflow: hidden; margin: auto; display: block; outline:none; touch-action: pan-x pan-y; touch-action: none;}
 
 		</style>
+
     </head>
     <body>
+<div class="wrapper"></div>	
+		
+		
 
 <canvas id="puzzle" width="640" height="640"></canvas>
 <p id="texto" style="font-size:30px;"></p>
@@ -30,17 +56,24 @@ var canvas=document.getElementById("puzzle");
 var context=canvas.getContext('2d');
 
 
-
-
-canvas.width=window.innerWidth;
-canvas.height=window.innerWidth;
-canvas.style.left=0;
-canvas.style.top=(window.innerHeight/2)-(canvas.height/2)+"px";
-canvas.style.position="absolute";
+if(window.innerWidth>window.innerHeight) {
+	canvas.width=window.innerHeight;
+	canvas.height=window.innerHeight;
+	canvas.style.left=(window.innerWidth/2)-(canvas.width/2)+"px";;
+	canvas.style.top=0;
+	canvas.style.position="absolute";
+	} else {
+	canvas.width=window.innerWidth;
+	canvas.height=window.innerWidth;
+	canvas.style.left=0;
+	canvas.style.top=(window.innerHeight/2)-(canvas.height/2)+"px";
+	canvas.style.position="absolute";
+	}
 
 //document.getElementById("texto").innerHTML=canvas.width;
 
 var img=new Image();
+var wimg=640;
 img.src='teste.png';
 //img.src='data:image/png;base64,
 img.addEventListener('load', drawTiles, false);
@@ -48,8 +81,10 @@ img.addEventListener('load', drawTiles, false);
 var bS=canvas.width;
 var tC=3;
 
-var tS=bS / tC;
-var tS1=640/tC;
+var tS=bS/tC;
+var tS1=wimg/tC;
+
+//document.getElementById("texto").innerHTML=img.naturalWidth;
 
 var cL=new Object;
 cL.x=0;
@@ -65,97 +100,95 @@ var solved=false;
 
 var dragging=false;
 var dx,dy;
-var drgx,drgy;
-var clix,cliy;
-var empx,empy;
+var drg=new Object;
+var cli=new Object;
+var emp=new Object;
 
 var bP;
 setBoard();
 
 function mouseDown(e) {
-  cL.x=Math.floor((e.clientX - canvas.offsetLeft) / tS);
-  cL.y=Math.floor((e.clientY - canvas.offsetTop) / tS);
-  if (distance(cL.x, cL.y, eL.x, eL.y) == 1) {
+  cL.x=Math.floor((e.clientX-canvas.offsetLeft)/tS);
+  cL.y=Math.floor((e.clientY-canvas.offsetTop)/tS);
+  if (distance(cL.x,cL.y,eL.x,eL.y) == 1) {
   dragging=true;
-  drgx=cL.x*tS;
-  drgy=cL.y*tS;
-  clix=drgx;
-  cliy=drgy;
-  empx=eL.x*tS;
-  empy=eL.y*tS;
-  dx=(cL.x - eL.x);
-  dy=(cL.y - eL.y);
+  drg.x=cL.x*tS;
+  drg.y=cL.y*tS;
+  cli.x=drg.x;
+  cli.y=drg.y;
+  emp.x=eL.x*tS;
+  emp.y=eL.y*tS;
+  dx=cL.x-eL.x;
+  dy=cL.y-eL.y;
   }
 }
 
 function mouseMove(e) {
-	if(dragging && !solved) {
-		context.clearRect ( drgx , drgy , tS , tS );
-		drgx=e.clientX - canvas.offsetLeft-tS/2;
-		drgy=e.clientY - canvas.offsetTop-tS/2;
-		
-		//e.preventDefault();
+	if(dragging&&!solved) {
+		context.clearRect(drg.x,drg.y,tS,tS);
+		drg.x=e.clientX-canvas.offsetLeft-tS/2;
+		drg.y=e.clientY-canvas.offsetTop-tS/2;
 		if(dx==0) {
-			drgx=clix;
+			drg.x=cli.x;
 			if(dy>0) {
-				if(drgy>cliy) drgy=cliy;
-				if(drgy<empy) drgy=empy;
+				if(drg.y>cli.y) drg.y=cli.y;
+				if(drg.y<emp.y) drg.y=emp.y;
 				}
 			if(dy<0) {
-				if(drgy<cliy) drgy=cliy;
-				if(drgy>empy) drgy=empy;
+				if(drg.y<cli.y) drg.y=cli.y;
+				if(drg.y>emp.y) drg.y=emp.y;
 				}
 			}
 		if(dy==0) {
-			drgy=cliy;
+			drg.y=cli.y;
 			if(dx>0) {
-				if(drgx>clix) drgx=clix;
-				if(drgx<empx) drgx=empx;
+				if(drg.x>cli.x) drg.x=cli.x;
+				if(drg.x<emp.x) drg.x=emp.x;
 				}
 			if(dx<0) {
-				if(drgx<clix) drgx=clix;
-				if(drgx>empx) drgx=empx;
+				if(drg.x<cli.x) drg.x=cli.x;
+				if(drg.x>emp.x) drg.x=emp.x;
 				}
 			}
 		var x=bP[cL.x][cL.y].x;
         var y=bP[cL.x][cL.y].y;
-		context.drawImage(img, x * tS1, y * tS1, tS1, tS1,drgx, drgy, tS-space, tS-space);
+		context.drawImage(img,x*tS1,y*tS1,tS1,tS1,drg.x,drg.y,tS-space,tS-space);
 	}
 }
 
 function mouseUp(e) {
 	if(dragging && !solved) {
 		if(dx==0) {
-			var d1=Math.abs(drgy-cliy);
-			var d2=Math.abs(drgy-empy);
+			var d1=Math.abs(drg.y-cli.y);
+			var d2=Math.abs(drg.y-emp.y);
 			}
 		if(dy==0) {
-			var d1=Math.abs(drgx-clix);
-			var d2=Math.abs(drgx-empx);
+			var d1=Math.abs(drg.x-cli.x);
+			var d2=Math.abs(drg.x-emp.x);
 			}
 			if(d1>d2) movePiece(); else {
 				var x=bP[cL.x][cL.y].x;
 				var y=bP[cL.x][cL.y].y;
-				context.clearRect ( empx , empy , tS , tS );
-				context.drawImage(img, x * tS1, y * tS1, tS1, tS1,clix, cliy, tS-space, tS-space);
+				context.clearRect(emp.x,emp.y,tS,tS);
+				context.drawImage(img,x*tS1,y*tS1,tS1,tS1,cli.x,cli.y,tS-space,tS-space);
 				}
 		dragging=false;
 	}
 	
 }
 
-	canvas.addEventListener('touchstart', e => { e.preventDefault(); mouseDown(e.touches[0]);});
-	canvas.addEventListener("touchend", e => { mouseUp(e.touches[0]);});
-	canvas.addEventListener("touchmove", e => { mouseMove(e.touches[0]);});
+	canvas.addEventListener('touchstart',e=> {e.preventDefault();mouseDown(e.touches[0]);});
+	canvas.addEventListener("touchend",e=> {mouseUp(e.touches[0]);});
+	canvas.addEventListener("touchmove",e=> {mouseMove(e.touches[0]);});
 		 
-	canvas.addEventListener("mousedown", mouseDown, false);
-	canvas.addEventListener("mouseup", mouseUp, false);
-	canvas.addEventListener("mouseout", mouseUp, false);
-	canvas.addEventListener("mousemove", mouseMove, false);
+	canvas.addEventListener("mousedown",mouseDown);
+	canvas.addEventListener("mouseup", mouseUp);
+	canvas.addEventListener("mouseout", mouseUp);
+	canvas.addEventListener("mousemove", mouseMove);
 	
 function movePiece() {
-  if (distance(cL.x, cL.y, eL.x, eL.y) == 1) {
-    slideTile(eL, cL);
+  if(distance(cL.x,cL.y,eL.x,eL.y)==1) {
+    slideTile(eL,cL);
     drawTiles();
   }
   if (solved) {
@@ -176,44 +209,61 @@ document.getElementById('again').onclick=function(e) {
 
 function setBoard() {
   bP=new Array(tC);
-  for (var i=0; i < tC; ++i) {
+  for (var i=0;i<tC;++i) {
     bP[i]=new Array(tC);
-    for (var j=0; j < tC; ++j) {
+    for (var j=0;j<tC;++j) {
       bP[i][j]=new Object;
-      bP[i][j].x=(tC - 1) - i;
-      bP[i][j].y=(tC - 1) - j;
+      bP[i][j].x=i;//(tC-1)-i;
+      bP[i][j].y=j;//(tC-1)-j;
     }
   }
-  
-  eL.x=bP[tC - 1][tC - 1].x;
-  eL.y=bP[tC - 1][tC - 1].y;
+  var r1=new Object,r2=new Object;
+  var bPt=new Object;
+  for(i=0;i<20;i++) {
+	do {
+		r1.x=Math.floor(Math.random()*tC);
+		r1.y=Math.floor(Math.random()*tC);
+		r2.x=Math.floor(Math.random()*tC);
+		r2.y=Math.floor(Math.random()*tC);
+		} while((r1.x==r2.x)&&(r1.y==r2.y));
+	bPt.x=bP[r1.x][r1.y].x;
+	bPt.y=bP[r1.x][r1.y].y;
+	bP[r1.x][r1.y].x=bP[r2.x][r2.y].x;
+	bP[r1.x][r1.y].y=bP[r2.x][r2.y].y;
+	bP[r2.x][r2.y].x=bPt.x;
+	bP[r2.x][r2.y].y=bPt.y;
+	}
+	
+  eL.x=bP[tC-1][tC-1].x;
+  eL.y=bP[tC-1][tC-1].y;
   solved=false;
 }
 
 function drawTiles() {
-  context.clearRect ( 0 , 0 , bS , bS );
-  for (var i=0; i < tC; ++i) {
-    for (var j=0; j < tC; ++j) {
+  wimg=img.width;
+  context.clearRect(0,0,bS,bS);
+  for (var i=0;i<tC;++i) {
+    for (var j=0;j<tC;++j) {
       var x=bP[i][j].x;
       var y=bP[i][j].y;
-	  if(solved == true) space=0;
-      if(i != eL.x || j != eL.y || solved == true) {
-        context.drawImage(img, x * tS1, y * tS1, tS1, tS1, i * tS, j * tS, tS-space, tS-space);
+	  if(solved==true) space=0;
+      if(i!=eL.x||j!=eL.y||solved==true) {
+        context.drawImage(img,x*tS1,y*tS1,tS1,tS1,i*tS,j*tS,tS-space,tS-space);
       }
     }
   }
 }
 
-function distance(x1, y1, x2, y2) {
-  return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+function distance(x1,y1,x2,y2) {
+  return Math.abs(x1-x2)+Math.abs(y1-y2);
 }
 
-function slideTile(tL, fL) {
+function slideTile(tL,fL) {
   if (!solved) {
     bP[tL.x][tL.y].x=bP[fL.x][fL.y].x;
     bP[tL.x][tL.y].y=bP[fL.x][fL.y].y;
-    bP[fL.x][fL.y].x=tC - 1;
-    bP[fL.x][fL.y].y=tC - 1;
+    bP[fL.x][fL.y].x=tC-1;
+    bP[fL.x][fL.y].y=tC-1;
     tL.x=fL.x;
     tL.y=fL.y;
     checkSolved();
@@ -222,9 +272,9 @@ function slideTile(tL, fL) {
 
 function checkSolved() {
   var flag=true;
-  for (var i=0; i < tC; ++i) {
-    for (var j=0; j < tC; ++j) {
-      if (bP[i][j].x != i || bP[i][j].y != j) {
+  for (var i=0;i<tC;++i) {
+    for (var j=0;j<tC;++j) {
+      if (bP[i][j].x!=i||bP[i][j].y!=j) {
         flag=false;
       }
     }
@@ -233,5 +283,8 @@ function checkSolved() {
 }
 
 </script>
+
+<p> (c)2022 - Fabio de Araujo Bento</p>
+
     </body>
 </html>
