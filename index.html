@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta name="apple-mobile-web-app-capable"content="yes">
+		
+        <title>Puzzle Game</title>
+		<style type="text/css">
+		html {
+			background: radial-gradient(circle closest-corner, #FF8961, #FFFB89, #74BDCB, #0E42C4) fixed;
+						
+		}
+		html,body { -webkit-user-select:none; -webkit-touch-callout:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
+		  		    height: 100%; overflow: hidden; margin: auto; display: block; outline:none; touch-action: pan-x pan-y; touch-action: none;}
+
+		</style>
+    </head>
+    <body>
+
+<canvas id="puzzle" width="640" height="640"></canvas>
+<p id="texto" style="font-size:50px;"></p>
+<form>
+  <input type="hidden" id="again" style="font-size:50px;" value="Jogar de novo?">
+</form>
+
+<script >
+
+var canvas=document.getElementById("puzzle");
+
+
+var context=canvas.getContext('2d');
+
+
+
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerWidth;
+canvas.style.left=0;
+canvas.style.top=(window.innerHeight/2)-(canvas.height/2)+"px";
+canvas.style.position="absolute";
+
+//document.getElementById("texto").innerHTML=canvas.width;
+
+var img=new Image();
+img.src='teste.png';
+//img.src='data:image/png;base64,
+img.addEventListener('load', drawTiles, false);
+
+var bS=canvas.width;
+var tC=2;
+
+var tS=bS / tC;
+var tS1=640/tC;
+
+var cL=new Object;
+cL.x=0;
+cL.y=0;
+
+var eL=new Object;
+eL.x=0;
+eL.y=0;
+
+var space=2;
+
+var solved=false;
+
+var dragging=false;
+var dx,dy;
+var drgx,drgy;
+var clix,cliy;
+var empx,empy;
+
+var bP;
+setBoard();
+
+function mouseDown(e) {
+  cL.x=Math.floor((e.clientX - canvas.offsetLeft) / tS);
+  cL.y=Math.floor((e.clientY - canvas.offsetTop) / tS);
+  if (distance(cL.x, cL.y, eL.x, eL.y) == 1) {
+  dragging=true;
+  drgx=cL.x*tS;
+  drgy=cL.y*tS;
+  clix=drgx;
+  cliy=drgy;
+  empx=eL.x*tS;
+  empy=eL.y*tS;
+  dx=(cL.x - eL.x);
+  dy=(cL.y - eL.y);
+  }
+}
+
+function mouseMove(e) {
+	if(dragging && !solved) {
+		context.clearRect ( drgx , drgy , tS , tS );
+		drgx=e.clientX - canvas.offsetLeft-tS/2;
+		drgy=e.clientY - canvas.offsetTop-tS/2;
+		
+		//e.preventDefault();
+		if(dx==0) {
+			drgx=clix;
+			if(dy>0) {
+				if(drgy>cliy) drgy=cliy;
+				if(drgy<empy) drgy=empy;
+				}
+			if(dy<0) {
+				if(drgy<cliy) drgy=cliy;
+				if(drgy>empy) drgy=empy;
+				}
+			}
+		if(dy==0) {
+			drgy=cliy;
+			if(dx>0) {
+				if(drgx>clix) drgx=clix;
+				if(drgx<empx) drgx=empx;
+				}
+			if(dx<0) {
+				if(drgx<clix) drgx=clix;
+				if(drgx>empx) drgx=empx;
+				}
+			}
+		var x=bP[cL.x][cL.y].x;
+        var y=bP[cL.x][cL.y].y;
+		context.drawImage(img, x * tS1, y * tS1, tS1, tS1,drgx, drgy, tS-space, tS-space);
+	}
+}
+
+function mouseUp(e) {
+	if(dragging && !solved) {
+		if(dx==0) {
+			var d1=Math.abs(drgy-cliy);
+			var d2=Math.abs(drgy-empy);
+			}
+		if(dy==0) {
+			var d1=Math.abs(drgx-clix);
+			var d2=Math.abs(drgx-empx);
+			}
+			if(d1>d2) movePiece(); else {
+				var x=bP[cL.x][cL.y].x;
+				var y=bP[cL.x][cL.y].y;
+				context.clearRect ( empx , empy , tS , tS );
+				context.drawImage(img, x * tS1, y * tS1, tS1, tS1,clix, cliy, tS-space, tS-space);
+				}
+		dragging=false;
+	}
+	
+}
+
+	canvas.addEventListener('touchstart', e => { e.preventDefault(); mouseDown(e.touches[0]);});
+	canvas.addEventListener("touchend", e => { mouseUp(e.touches[0]);});
+	canvas.addEventListener("touchmove", e => { mouseMove(e.touches[0]);});
+		 
+	canvas.addEventListener("mousedown", mouseDown, false);
+	canvas.addEventListener("mouseup", mouseUp, false);
+	canvas.addEventListener("mouseout", mouseUp, false);
+	canvas.addEventListener("mousemove", mouseMove, false);
+	
+function movePiece() {
+  if (distance(cL.x, cL.y, eL.x, eL.y) == 1) {
+    slideTile(eL, cL);
+    drawTiles();
+  }
+  if (solved) {
+    document.getElementById("texto").innerHTML="PARABÉNS !!!!";
+	document.getElementById("again").type="button";
+  }
+}
+
+document.getElementById('again').onclick=function(e) {
+	document.getElementById("texto").innerHTML="";
+	space=2;
+	dragging=false;
+	setBoard(); 
+	drawTiles();
+	document.getElementById("again").type="hidden";
+	}
+
+
+function setBoard() {
+  bP=new Array(tC);
+  for (var i=0; i < tC; ++i) {
+    bP[i]=new Array(tC);
+    for (var j=0; j < tC; ++j) {
+      bP[i][j]=new Object;
+      bP[i][j].x=(tC - 1) - i;
+      bP[i][j].y=(tC - 1) - j;
+    }
+  }
+  
+  eL.x=bP[tC - 1][tC - 1].x;
+  eL.y=bP[tC - 1][tC - 1].y;
+  solved=false;
+}
+
+function drawTiles() {
+  context.clearRect ( 0 , 0 , bS , bS );
+  for (var i=0; i < tC; ++i) {
+    for (var j=0; j < tC; ++j) {
+      var x=bP[i][j].x;
+      var y=bP[i][j].y;
+	  if(solved == true) space=0;
+      if(i != eL.x || j != eL.y || solved == true) {
+        context.drawImage(img, x * tS1, y * tS1, tS1, tS1, i * tS, j * tS, tS-space, tS-space);
+      }
+    }
+  }
+}
+
+function distance(x1, y1, x2, y2) {
+  return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+}
+
+function slideTile(tL, fL) {
+  if (!solved) {
+    bP[tL.x][tL.y].x=bP[fL.x][fL.y].x;
+    bP[tL.x][tL.y].y=bP[fL.x][fL.y].y;
+    bP[fL.x][fL.y].x=tC - 1;
+    bP[fL.x][fL.y].y=tC - 1;
+    tL.x=fL.x;
+    tL.y=fL.y;
+    checkSolved();
+  }
+}
+
+function checkSolved() {
+  var flag=true;
+  for (var i=0; i < tC; ++i) {
+    for (var j=0; j < tC; ++j) {
+      if (bP[i][j].x != i || bP[i][j].y != j) {
+        flag=false;
+      }
+    }
+  }
+  solved=flag;
+}
+
+</script>
+    </body>
+</html>
