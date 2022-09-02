@@ -26,6 +26,12 @@
 <script >
 
 var canvas = document.getElementById("puzzle");
+var cw=window.innerWidth;
+if(cw>512) cw=512;
+canvas.width=cw;
+
+
+
 var context = canvas.getContext('2d');
 
 var img = new Image();
@@ -46,7 +52,7 @@ var emptyLoc = new Object;
 emptyLoc.x = 0;
 emptyLoc.y = 0;
 
-var space=1;
+var space=2;
 
 var solved = false;
 
@@ -161,7 +167,7 @@ function movePiece() {
 
 document.getElementById('again').onclick = function(e) {
 	document.getElementById("texto").innerHTML = "";
-	space=1;
+	space=2;
 	setBoard(); 
 	drawTiles();
 	document.getElementById("again").type="hidden";
@@ -191,8 +197,7 @@ function drawTiles() {
       var y = boardParts[i][j].y;
 	  if(solved == true) space=0;
       if(i != emptyLoc.x || j != emptyLoc.y || solved == true) {
-        context.drawImage(img, x * tileSize, y * tileSize, tileSize, tileSize,
-            i * tileSize, j * tileSize, tileSize-space, tileSize-space);
+        context.drawImage(img, x * tileSize, y * tileSize, tileSize, tileSize,            i * tileSize, j * tileSize, tileSize-space, tileSize-space);
       }
     }
   }
