@@ -199,11 +199,11 @@ function setBoard() {
     bP[i]=new Array(tC);
     for (var j=0;j<tC;++j) {
       bP[i][j]=new Object;
-      bP[i][j].x=i;//(tC-1)-i;
-      bP[i][j].y=j;//(tC-1)-j;
+      bP[i][j].x=(tC-1)-i;
+      bP[i][j].y=(tC-1)-j;
     }
   }
-  var r1=new Object,r2=new Object;
+ /* var r1=new Object,r2=new Object;
   var bPt=new Object;
   for(i=0;i<20;i++) {
 	do {
@@ -218,7 +218,7 @@ function setBoard() {
 	bP[r1.x][r1.y].y=bP[r2.x][r2.y].y;
 	bP[r2.x][r2.y].x=bPt.x;
 	bP[r2.x][r2.y].y=bPt.y;
-	}
+	}*/
 	
   eL.x=bP[tC-1][tC-1].x;
   eL.y=bP[tC-1][tC-1].y;
