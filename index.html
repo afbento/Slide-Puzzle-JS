@@ -11,6 +11,9 @@
 			body {
 				width: 100%;
 				height: 100%;
+				resize: both;
+				overflow: auto;
+				/*z-index: -1;*/
 				background: linear-gradient(45deg ,#FF9861,#FFFB89,#74BDCB,#0E42C4);
 				background-size: 400% 100%;
 				animation: gradient 15s ease infinite alternate;
@@ -31,6 +34,7 @@
     <body>
 
 
+
 <canvas id="puzzle" width="640" height="640"></canvas>
 <p id="texto" style="font-size:30px;"></p>
 <form>
@@ -44,18 +48,6 @@ var canvas=document.getElementById("puzzle");
 
 var context=canvas.getContext('2d');
 
-
-if(window.innerWidth>window.innerHeight) {
-	canvas.width=window.innerHeight*0.95;
-	canvas.height=window.innerHeight*0.95;
-	} else {
-	canvas.width=window.innerWidth*0.95;
-	canvas.height=window.innerWidth*0.95; }
-	canvas.style.left=(window.innerWidth/2)-(canvas.width/2)+"px";
-	canvas.style.top=(window.innerHeight/2)-(canvas.height/2)+"px";
-	canvas.style.position="absolute";
-	
-
 //document.getElementById("texto").innerHTML=canvas.width;
 
 var img=new Image();
@@ -66,9 +58,30 @@ img.addEventListener('load', drawTiles, false);
 
 var bS=canvas.width;
 var tC=3;
-
 var tS=bS/tC;
 var tS1=wimg/tC;
+
+window.addEventListener("resize",wresize);
+
+var fresize=true;
+
+function wresize() {
+	if(window.innerWidth>window.innerHeight) {
+	canvas.width=window.innerHeight*0.95;
+	canvas.height=window.innerHeight*0.95;
+	} else {
+	canvas.width=window.innerWidth*0.95;
+	canvas.height=window.innerWidth*0.95; }
+	canvas.style.left=(window.innerWidth/2)-(canvas.width/2)+"px";
+	canvas.style.top=(window.innerHeight/2)-(canvas.height/2)+"px";
+	canvas.style.position="absolute";
+	bS=canvas.width;
+	tS=bS/tC;
+	if(!fresize) drawTiles();
+	fresize=false;
+}
+
+wresize();
 
 //document.getElementById("texto").innerHTML=img.naturalWidth;
 
@@ -203,7 +216,7 @@ function setBoard() {
       bP[i][j].y=(tC-1)-j;
     }
   }
- /* var r1=new Object,r2=new Object;
+  /*var r1=new Object,r2=new Object;
   var bPt=new Object;
   for(i=0;i<20;i++) {
 	do {
@@ -218,7 +231,7 @@ function setBoard() {
 	bP[r1.x][r1.y].y=bP[r2.x][r2.y].y;
 	bP[r2.x][r2.y].x=bPt.x;
 	bP[r2.x][r2.y].y=bPt.y;
-	}*/
+	} */
 	
   eL.x=bP[tC-1][tC-1].x;
   eL.y=bP[tC-1][tC-1].y;
@@ -271,6 +284,7 @@ function checkSolved() {
 </script>
 
 <p> (c)2022 - Fabio A. Bento</p>
+
 
     </body>
 </html>
