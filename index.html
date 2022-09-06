@@ -11,8 +11,8 @@
 			body {
 				width: 100%;
 				height: 100%;
-				resize: both;
-				overflow: auto;
+				/*resize: both;*/
+				/*overflow: auto;*/
 				/*z-index: -1;*/
 				background: linear-gradient(45deg ,#FF9861,#FFFB89,#74BDCB,#0E42C4);
 				background-size: 400% 100%;
@@ -20,7 +20,7 @@
 				} 
 			@keyframes gradient {
 				0% { background-position: 0% 0%; }
-				100% { background-position: 100% 0%; }
+				100% { background-position: 100% 100%; }
 				
 				}
 			
@@ -57,7 +57,7 @@ img.src='teste.png';
 img.addEventListener('load', drawTiles, false);
 
 var bS=canvas.width;
-var tC=3;
+var tC=4;
 var tS=bS/tC;
 var tS1=wimg/tC;
 
